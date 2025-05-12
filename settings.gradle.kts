@@ -1,7 +1,7 @@
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
-            from(files("../Tenebris/libs.versions.toml"))
+            from(files("../Tenebris/dependencies.toml"))
         }
     }
 }
