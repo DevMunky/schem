@@ -1,18 +1,22 @@
 package net.hollowcube.schem;
 
 import net.hollowcube.schem.util.BlockConsumer;
+import net.hollowcube.schem.util.CoordinateUtil;
 import net.hollowcube.schem.util.Rotation;
+import net.hollowcube.schem.util.VarIntReader;
 import net.kyori.adventure.nbt.ByteArrayBinaryTag;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.BlockManager;
 import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+
+import static net.hollowcube.schem.util.CoordinateUtil.blockIndex;
 
 @SuppressWarnings("UnstableApiUsage")
 public record Structure(
@@ -31,7 +35,23 @@ public record Structure(
 
     @Override
     public void forEachBlock(Rotation rotation, BlockConsumer consumer) {
+        final BlockManager BLOCK_MANAGER = MinecraftServer.getBlockManager();
+        var palette = palettes.getFirst();
+        for (BlockInfo bi : blocks) {
+            var block = palette[bi.paletteIndex];
+            var blockEntity = bi.blockEntity;
+            if (blockEntity != null) {
+                // Lower case the IDs always to prevent parse errors, especially for legacy names like 'Beacon'
+                var lowerKey = blockEntity.id().toLowerCase(Locale.ROOT);
+                block = block.withHandler(BLOCK_MANAGER.getHandlerOrDummy(lowerKey))
+                             .withNbt(blockEntity.data());
+            }
 
+            consumer.accept(
+                    CoordinateUtil.rotatePos(bi.pos, rotation),
+                    CoordinateUtil.rotateBlock(block, rotation)
+            );
+        }
     }
 
     @Override

@@ -18,7 +18,7 @@ final class ReadHelpers {
     public static <T extends BinaryTag> T getRequired(CompoundBinaryTag tag, String key, BinaryTagType<T> type) {
         var value = tag.get(key);
         if (value == null) throw new SchematicReadException("missing required field '" + key + "'");
-        if (value.type() != type) throw new SchematicReadException("expected field '" + key + "' to be a " + type);
+        if (value.type() != type) throw new SchematicReadException("expected field '" + key + "' to be a " + type + ", was " + value.type());
         //noinspection unchecked
         return (T) value;
     }
@@ -27,6 +27,15 @@ final class ReadHelpers {
         var rawOffset = getRequired(tag, key, BinaryTagTypes.INT_ARRAY);
         assertTrue(rawOffset.size() == 3, "invalid {0} size {1}", key, rawOffset.size());
         return new Vec(rawOffset.get(0), rawOffset.get(1), rawOffset.get(2));
+    }
+
+    public static Point getRequiredPointFromList(CompoundBinaryTag tag, String key) {
+        var rawOffset = getRequired(tag, key, BinaryTagTypes.LIST);
+        assertTrue(rawOffset.size() == 3, "invalid {0} size {1}", key, rawOffset.size());
+        var x = ((NumberBinaryTag) rawOffset.get(0)).intValue();
+        var y = ((NumberBinaryTag) rawOffset.get(1)).intValue();
+        var z = ((NumberBinaryTag) rawOffset.get(2)).intValue();
+        return new Vec(x, y, z);
     }
 
     public static Point getRequiredVec3(CompoundBinaryTag tag, String key) {

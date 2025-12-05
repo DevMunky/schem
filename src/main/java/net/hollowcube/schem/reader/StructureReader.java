@@ -31,20 +31,20 @@ final class StructureReader implements SchematicReader {
     }
 
     public Schematic read(Map.Entry<String, CompoundBinaryTag> rootPair) {
-        assertTrue("".equals(rootPair.getKey()), "root tag must be empty, was: '{0}'", rootPair.getKey());
+        assertTrue(rootPair.getKey().isEmpty(), "root tag must be empty, was: '{0}'", rootPair.getKey());
         var root = rootPair.getValue();
         var dataVersion = getRequired(root, "DataVersion", BinaryTagTypes.INT);
 
-        var size = getRequiredPoint(root, "size");
+        var size = getRequiredPointFromList(root, "size");
 
         // === Palettes ===
         int paletteSize = -1;
         var palettes = new ArrayList<Block[]>();
         var singlePalette = root.getList("palette", BinaryTagTypes.COMPOUND);
-        if (singlePalette.size() != 0) {
+        if (!singlePalette.isEmpty()) {
             var palette = new Block[singlePalette.size()];
             for (int i = 0; i < singlePalette.size(); i++)
-                palette[i++] = readBlockState(singlePalette.getCompound(i));
+                palette[i] = readBlockState(singlePalette.getCompound(i));
             palettes.add(palette);
             paletteSize = palette.length;
         } else {
@@ -53,7 +53,7 @@ final class StructureReader implements SchematicReader {
                 var innerPalette = (ListBinaryTag) innerPaletteRaw;
                 var palette = new Block[innerPalette.size()];
                 for (int i = 0; i < innerPalette.size(); i++)
-                    palette[i++] = readBlockState(innerPalette.getCompound(i));
+                    palette[i] = readBlockState(innerPalette.getCompound(i));
                 palettes.add(palette);
 
                 if (paletteSize == -1) paletteSize = palette.length;
@@ -66,7 +66,7 @@ final class StructureReader implements SchematicReader {
         var blocks = new ArrayList<Structure.BlockInfo>();
         for (var block : root.getList("blocks", BinaryTagTypes.COMPOUND)) {
             var blockCompound = (CompoundBinaryTag) block;
-            var pos = getRequiredPoint(blockCompound, "pos");
+            var pos = getRequiredPointFromList(blockCompound, "pos");
             var state = getRequired(blockCompound, "state", BinaryTagTypes.INT).value();
             assertTrue(state >= 0 && state < paletteSize, "invalid palette index {0}", state);
 
