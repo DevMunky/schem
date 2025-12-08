@@ -32,9 +32,10 @@ final class ReadHelpers {
     public static Point getRequiredPointFromList(CompoundBinaryTag tag, String key) {
         var rawOffset = getRequired(tag, key, BinaryTagTypes.LIST);
         assertTrue(rawOffset.size() == 3, "invalid {0} size {1}", key, rawOffset.size());
-        var x = ((NumberBinaryTag) rawOffset.get(0)).intValue();
-        var y = ((NumberBinaryTag) rawOffset.get(1)).intValue();
-        var z = ((NumberBinaryTag) rawOffset.get(2)).intValue();
+        assertTrue(rawOffset.elementType().equals(BinaryTagTypes.INT), "invalid {0} type not {1}", key, BinaryTagTypes.INT);
+        var x = rawOffset.getInt(0);
+        var y = rawOffset.getInt(1);
+        var z = rawOffset.getInt(2);
         return new Vec(x, y, z);
     }
 

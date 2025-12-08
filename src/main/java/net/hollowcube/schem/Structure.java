@@ -36,6 +36,7 @@ public record Structure(
     @Override
     public void forEachBlock(Rotation rotation, BlockConsumer consumer) {
         final BlockManager BLOCK_MANAGER = MinecraftServer.getBlockManager();
+        // TODO properly handle multiple palettes, albeit uncommon.
         var palette = palettes.getFirst();
         for (BlockInfo bi : blocks) {
             var block = palette[bi.paletteIndex];
